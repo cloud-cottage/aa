@@ -9,29 +9,6 @@
   </style>
 </head>
 <body>
-  <script>
-    var serviceWorkerVersion = null;
-    var scriptLoaded = false;
-    function loadMainDartJs() {
-      if (scriptLoaded) { return; }
-      scriptLoaded = true;
-      var scriptTag = document.createElement('script');
-      scriptTag.src = 'main.dart.js';
-      scriptTag.type = 'application/javascript';
-      document.body.append(scriptTag);
-    }
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('flutter_service_worker.js?v=' + serviceWorkerVersion).then(function(reg) {
-        function waitForActivation(serviceWorker) {
-          serviceWorker.addEventListener('statechange', function() {
-            if (serviceWorker.state == 'activated') { loadMainDartJs(); }
-          });
-        }
-        if (reg.active) { loadMainDartJs(); }
-        else { reg.addEventListener('updatefound', function() { waitForActivation(reg.installing); }); }
-      }).catch(function(e) { console.error(e); });
-    } else { loadMainDartJs(); }
-  </script>
-  <script src="flutter.js" defer></script>
+  <script src="flutter.js"></script>
 </body>
 </html>
