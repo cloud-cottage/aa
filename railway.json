@@ -1,7 +1,0 @@
-{
-  "build": {
-    "builder": "flutter/flutter",
-    "install": "flutter pub get"
-  },
-  "outputDirectory": "build/web"
-}
