@@ -1,5 +1,6 @@
 {
-  "buildCommand": "flutter build web --release",
-  "outputDirectory": "build/web",
-  "installCommand": "flutter pub get"
+  "build": {
+    "install": "npm install -g vercel",
+    "build": "vercel build --prod"
+  }
 }
