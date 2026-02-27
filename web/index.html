@@ -1,15 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
   <base href="./">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AA斗地主</title>
+  <style>
+    body { margin: 0; background: #0B0B0F; color: #D4AF37; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .loader { text-align: center; }
+  </style>
 </head>
 <body>
-  <script src="flutter.js"></script>
+  <div class="loader" id="loader">
+    <h1>AA斗地主</h1>
+    <p>加载中...</p>
+  </div>
+  <script>
+    window.addEventListener('load', function(ev) {
+      _flutter.loader.loadEntrypoint({
+        serviceWorker: { serviceWorkerVersion: serviceWorkerVersion },
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            document.getElementById('loader').style.display = 'none';
+            appRunner.runApp();
+          });
+        }
+      });
+    });
+  </script>
+  <script src="flutter.js" defer></script>
 </body>
 </html>
