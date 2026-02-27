@@ -16,11 +16,11 @@ void main() {
 
   test('CardTypeDetector detects straight', () {
     final cards = [
-      CardModel(suit: Suit clubs, rank: Rank.five, id: 4),
-      CardModel(suit: Suit diamonds, rank: Rank.six, id: 5),
-      CardModel(suit: Suit hearts, rank: Rank.seven, id: 6),
-      CardModel(suit: Suit spades, rank: Rank.eight, id: 7),
-      CardModel(suit: Suit clubs, rank: Rank.nine, id: 8),
+      CardModel(suit: Suit.clubs, rank: Rank.five, id: 4),
+      CardModel(suit: Suit.diamonds, rank: Rank.six, id: 5),
+      CardModel(suit: Suit.hearts, rank: Rank.seven, id: 6),
+      CardModel(suit: Suit.spades, rank: Rank.eight, id: 7),
+      CardModel(suit: Suit.clubs, rank: Rank.nine, id: 8),
     ];
     expect(CardTypeDetector.detect(cards), CardType.straight);
   });
