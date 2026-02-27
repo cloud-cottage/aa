@@ -1,0 +1,27 @@
+name: aa_doudizhu
+description: AlleyAce - AA斗地主 Flutter 跨端应用骨架（Phase A）
+version: 0.1.0
+environment:
+  sdk: ">=2.17.0 <3.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  riverpod: ^2.0.0
+  hive: ^2.1.0
+  hive_flutter: ^1.1.0
+  path_provider: ^2.0.11
+  firebase_core: ^2.14.0
+  firebase_auth: ^4.4.0
+  cloud_firestore: ^5.0.0
+  firebase_database: ^10.0.0
+  http: ^0.14.0
+  web3dart: ^2.0.0
+  walletconnect_dart: ^2.0.0
+dev_dependencies:
+  hive_generator: ^1.1.0
+  build_runner: ^2.1.7
+  flutter_test:
+    sdk: flutter
+flutter:
+  uses-material-design: true
