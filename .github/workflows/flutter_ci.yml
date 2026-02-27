@@ -1,0 +1,23 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [ feat/web-ui-demo ]
+  pull_request:
+    branches: [ main, master, feat/web-ui-demo ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Flutter pub get
+        run: flutter pub get
+      - name: Analyze
+        run: flutter analyze
+      - name: Run tests
+        run: flutter test
