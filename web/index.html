@@ -9,10 +9,31 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <title>AA斗地主 - AlleyAce</title>
   <link rel="manifest" href="manifest.json">
+  <style>
+    body { background: #0B0B0F; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    .loader { text-align: center; }
+    .spinner { width: 40px; height: 40px; border: 4px solid #333; border-top: 4px solid #D4AF37; border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
 </head>
 <body>
+  <div class="loader">
+    <h1>AA斗地主 - AlleyAce</h1>
+    <div class="spinner"></div>
+    <p>加载中...</p>
+  </div>
   <script>
-    // Flutter Web placeholder - will be replaced by build
+    window.addEventListener('load', function(ev) {
+      _flutter.loader.loadEntrypoint({
+        serviceWorker: { serviceWorkerVersion: serviceWorkerVersion },
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            appRunner.runApp();
+          });
+        }
+      });
+    });
   </script>
+  <script src="flutter.js" defer></script>
 </body>
 </html>
