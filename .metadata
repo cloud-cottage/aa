@@ -1,0 +1,25 @@
+{
+  "version": "0.1.0",
+  "revision": "0",
+  "channel": "stable",
+  "project_type": "app",
+  "migration": {
+    "platforms": [
+      {
+        "platform": "android",
+        "create": true,
+        "path": "android"
+      },
+      {
+        "platform": "ios",
+        "create": true,
+        "path": "ios"
+      },
+      {
+        "platform": "web",
+        "create": true,
+        "path": "web"
+      }
+    ]
+  }
+}
