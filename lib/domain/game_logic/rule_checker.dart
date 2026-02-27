@@ -3,14 +3,10 @@ import 'package:aa_doudizhu/domain/game_logic/game_state.dart';
 import 'package:aa_doudizhu/domain/game_logic/card_type.dart';
 
 abstract class RuleChecker {
-  // Determine if a player's handPlay is legal given the current game state
   bool isLegalPlay(List<CardModel> handPlay, GameState state);
-
-  // Compare current play with last play to see if it beats it
   bool canBeat(List<CardModel> currentPlay, List<CardModel> lastPlay, GameState state);
 }
 
-// Simple in-memory placeholder implementation for Phase A with improved heuristics
 class SimpleRuleChecker implements RuleChecker {
   int _rankValue(Rank r) {
     switch (r) {
@@ -38,8 +34,10 @@ class SimpleRuleChecker implements RuleChecker {
         return 12;
       case Rank.king:
         return 13;
-      case Rank.joker:
+      case Rank.smallJoker:
         return 14;
+      case Rank.bigJoker:
+        return 15;
     }
   }
 
@@ -55,21 +53,18 @@ class SimpleRuleChecker implements RuleChecker {
 
   @override
   bool isLegalPlay(List<CardModel> handPlay, GameState state) {
-    // Use CardTypeDetector for phase A legality
     final type = CardTypeDetector.detect(handPlay);
     return type != null;
   }
 
   @override
   bool canBeat(List<CardModel> currentPlay, List<CardModel> lastPlay, GameState state) {
-    // If there is no last play, any valid current play wins
     if (lastPlay.isEmpty) return true;
     final lastType = CardTypeDetector.detect(lastPlay);
     final currType = CardTypeDetector.detect(currentPlay);
     final isRocketLast = lastType == CardType.rocket;
     final isRocketCurr = currType == CardType.rocket;
 
-    // Rocket beats all non-rocket; if last is rocket, only rocket can beat
     if (isRocketLast) {
       return isRocketCurr;
     }
@@ -77,25 +72,9 @@ class SimpleRuleChecker implements RuleChecker {
       return true;
     }
     if (currType == null) return false;
-    // If different lengths, longer wins (simplified)
     if (currentPlay.length != lastPlay.length) return currentPlay.length > lastPlay.length;
-    // Same length: compare max rank as tie-breaker
     final currentMax = _maxRank(currentPlay);
     final lastMax = _maxRank(lastPlay);
     return currentMax > lastMax;
-  }
-}
-  @override
-  bool isLegalPlay(List<CardModel> handPlay, GameState state) {
-    // Basic sanity: must play at least one card
-    return handPlay.isNotEmpty;
-  }
-
-  @override
-  bool canBeat(List<CardModel> currentPlay, List<CardModel> lastPlay, GameState state) {
-    // Very naive comparison: beat if more cards or if there is no last play
-    if (lastPlay.isEmpty) return true;
-    if (currentPlay.isEmpty) return false;
-    return currentPlay.length > lastPlay.length;
   }
 }

@@ -19,7 +19,7 @@ ThemeData gothicTheme() {
       background: _kBackground,
     ),
     textTheme: const TextTheme(
-      bodyText2: TextStyle(color: Colors.white),
+      bodyMedium: TextStyle(color: Colors.white),
     ),
   );
 }

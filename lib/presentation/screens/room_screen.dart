@@ -122,15 +122,3 @@ class _RoomScreenState extends State<RoomScreen> {
     );
   }
 }
-
-class RoomScreen extends StatelessWidget {
-  const RoomScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('房间')),
-      body: Center(child: Text('房间界面占位')),
-    );
-  }
-}
