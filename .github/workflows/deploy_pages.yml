@@ -6,6 +6,7 @@ on:
       - feat/web-ui-demo
       - main
       - master
+  workflow_dispatch:
 
 jobs:
   build_and_deploy:
@@ -18,8 +19,17 @@ jobs:
           channel: stable
       - name: Install dependencies
         run: flutter pub get
+      - name: Show environment and Flutter info
+        run: |
+          uname -a
+          echo "Runner OS: $RUNNER_OS"
+          pwd
+          ls -la
+          flutter --version
       - name: Build Web
         run: flutter build web --release
+      - name: List build output
+        run: ls -la build/web
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
