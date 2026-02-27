@@ -15,8 +15,8 @@ dependencies:
   firebase_auth: ^4.4.0
   cloud_firestore: ^5.0.0
   firebase_database: ^10.0.0
-  http: ^0.14.0
-  web3dart: ^2.0.0
+  http: ^1.2.0
+  # web3dart: ^2.0.0  # commented - not needed for Phase A
   # walletconnect_dart removed due to dependency resolution issues
 dev_dependencies:
   hive_generator: ^1.1.0
