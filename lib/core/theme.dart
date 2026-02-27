@@ -32,10 +32,10 @@ ThemeData gothicTheme() {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     ),
-    cardTheme: CardTheme(
+    cardTheme: const CardThemeData(
       color: kSurface,
       elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
     ),
     textTheme: const TextTheme(
       bodyMedium: TextStyle(color: Colors.white),
