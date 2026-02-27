@@ -11,17 +11,22 @@ class LobbyScreen extends StatefulWidget {
 
 class _LobbyScreenState extends State<LobbyScreen> {
   final List<Map<String, dynamic>> _sampleRooms = [
-    {'name': '私人房-Alice', 'host': 'Alice', 'players': 2, 'token': 't1', 'isPrivate': true},
-    {'name': '私人房-Bob', 'host': 'Bob', 'players': 3, 'token': 't2', 'isPrivate': true},
-    {'name': '公开房-快来', 'host': 'System', 'players': 1, 'token': '', 'isPrivate': false},
-    {'name': '新手房', 'host': 'System', 'players': 0, 'token': '', 'isPrivate': false},
-    {'name': '高手房', 'host': 'ProPlayer', 'players': 2, 'token': '', 'isPrivate': false},
+    {'name': '私人房-Alice', 'host': 'Alice', 'players': 2, 'token': 't1', 'isPrivate': true, 'stake': 10},
+    {'name': '私人房-Bob', 'host': 'Bob', 'players': 3, 'token': 't2', 'isPrivate': true, 'stake': 50},
+    {'name': '公开房-快来', 'host': 'System', 'players': 1, 'token': '', 'isPrivate': false, 'stake': 1},
+    {'name': '新手房', 'host': 'System', 'players': 0, 'token': '', 'isPrivate': false, 'stake': 1},
+    {'name': '高手房', 'host': 'ProPlayer', 'players': 2, 'token': '', 'isPrivate': false, 'stake': 100},
   ];
   String _query = '';
+  bool _showPrivateOnly = false;
 
   @override
   Widget build(BuildContext context) {
-    final filtered = _sampleRooms.where((r) => r['name'].toString().toLowerCase().contains(_query.toLowerCase())).toList();
+    final filtered = _sampleRooms.where((r) {
+      final matchesQuery = r['name'].toString().toLowerCase().contains(_query.toLowerCase());
+      final matchesFilter = !_showPrivateOnly || r['isPrivate'] == true;
+      return matchesQuery && matchesFilter;
+    }).toList();
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -32,6 +37,19 @@ class _LobbyScreenState extends State<LobbyScreen> {
           ],
         ),
         backgroundColor: kSurface,
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            child: FilterChip(
+              label: Text('私人房', style: TextStyle(fontSize: 12, color: _showPrivateOnly ? kBackground : Colors.white54)),
+              selected: _showPrivateOnly,
+              onSelected: (v) => setState(() => _showPrivateOnly = v),
+              selectedColor: kGold,
+              backgroundColor: kSurfaceLight,
+              checkmarkColor: kBackground,
+            ),
+          ),
+        ],
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -87,6 +105,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
                           host: r['host'],
                           players: r['players'],
                           isPrivate: r['isPrivate'],
+                          stake: r['stake'] ?? 1,
                           onTap: () {
                             Navigator.of(context).pushNamed('/room');
                           },

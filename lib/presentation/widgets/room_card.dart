@@ -1,25 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:aa_doudizhu/core/theme.dart';
 
-class RoomCard extends StatelessWidget {
+class RoomCard extends StatefulWidget {
   final String name;
   final String host;
   final int players;
   final bool isPrivate;
+  final int stake;
   final VoidCallback? onTap;
-  const RoomCard({Key? key, required this.name, required this.host, required this.players, this.isPrivate = false, this.onTap}) : super(key: key);
+  const RoomCard({Key? key, required this.name, required this.host, required this.players, this.isPrivate = false, this.stake = 1, this.onTap}) : super(key: key);
+
+  @override
+  State<RoomCard> createState() => _RoomCardState();
+}
+
+class _RoomCardState extends State<RoomCard> {
+  bool _isPressed = false;
 
   @override
   Widget build(BuildContext context) {
+    final isFull = widget.players >= 3;
     return Card(
-      color: kSurface,
-      elevation: 2,
+      color: _isPressed ? kSurfaceLight : kSurface,
+      elevation: _isPressed ? 4 : 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.white.withOpacity(0.05)),
+        side: BorderSide(
+          color: widget.isPrivate ? kGold.withOpacity(0.3) : Colors.white.withOpacity(0.05),
+        ),
       ),
       child: InkWell(
-        onTap: onTap,
+        onTapDown: (_) => setState(() => _isPressed = true),
+        onTapUp: (_) => setState(() => _isPressed = false),
+        onTapCancel: () => setState(() => _isPressed = false),
+        onTap: isFull ? null : widget.onTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -31,11 +45,11 @@ class RoomCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: kSurfaceLight,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: kGold.withOpacity(0.3)),
+                  border: Border.all(color: widget.isPrivate ? kGold.withOpacity(0.3) : Colors.white12),
                 ),
                 child: Icon(
-                  isPrivate ? Icons.lock : Icons.public,
-                  color: isPrivate ? kGold : Colors.white54,
+                  widget.isPrivate ? Icons.lock : Icons.public,
+                  color: widget.isPrivate ? kGold : Colors.white54,
                 ),
               ),
               const SizedBox(width: 16),
@@ -43,36 +57,74 @@ class RoomCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(name, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(widget.name, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                        ),
+                        if (widget.isPrivate) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: kGold.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: kGold.withOpacity(0.3)),
+                            ),
+                            child: const Text('NFT', style: TextStyle(color: kGold, fontSize: 10, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ],
+                    ),
                     const SizedBox(height: 4),
-                    Text('房主: $host', style: TextStyle(color: Colors.white54, fontSize: 13)),
+                    Row(
+                      children: [
+                        Text('房主: ${widget.host}', style: TextStyle(color: Colors.white54, fontSize: 13)),
+                        const SizedBox(width: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.monetization_on, size: 12, color: kGold),
+                              const SizedBox(width: 2),
+                              Text('${widget.stake}', style: TextStyle(color: kGold, fontSize: 12)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: players >= 3 ? kRed.withOpacity(0.2) : kPrimary.withOpacity(0.2),
+                  color: isFull ? kRed.withOpacity(0.2) : kPrimary.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: players >= 3 ? kRed : kPrimary),
+                  border: Border.all(color: isFull ? kRed : kPrimary),
                 ),
                 child: Text(
-                  '$players/4',
+                  '${widget.players}/4',
                   style: TextStyle(
-                    color: players >= 3 ? kRed : kPrimary,
+                    color: isFull ? kRed : kPrimary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               const SizedBox(width: 12),
               ElevatedButton(
-                onPressed: onTap,
+                onPressed: isFull ? null : widget.onTap,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: kGold,
+                  backgroundColor: isFull ? Colors.grey : kGold,
                   foregroundColor: kBackground,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 ),
-                child: const Text('进入'),
+                child: Text(isFull ? '已满' : '进入'),
               ),
             ],
           ),
