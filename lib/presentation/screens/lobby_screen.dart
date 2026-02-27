@@ -124,8 +124,8 @@ class _LobbyScreenState extends State<LobbyScreen> {
               subtitle: Text('需要 NFT 房卡', style: TextStyle(color: Colors.white54)),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBarBar(content: Text(
-                  const Snack('NFT 房卡功能开发中...')),
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('NFT 房卡功能开发中...')),
                 );
               },
             ),
