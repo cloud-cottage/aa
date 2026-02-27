@@ -15,20 +15,22 @@
       height: 100vh; 
       margin: 0; 
     }
-    .loading { text-align: center; }
   </style>
 </head>
 <body>
-  <div class="loading" id="loading">
-    <h1>AA斗地主</h1>
-    <p>加载中...</p>
-  </div>
-  <script src="flutter.js" onload="removeLoading()"></script>
   <script>
-    function removeLoading() {
-      var loading = document.getElementById('loading');
-      if(loading) loading.style.display = 'none';
-    }
+    // Flutter Web bootstrap
+    window.addEventListener('load', function(ev) {
+      _flutter.loader.loadEntrypoint({
+        serviceWorker: { serviceWorkerVersion: serviceWorkerVersion },
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            appRunner.runApp();
+          });
+        }
+      });
+    });
   </script>
+  <script src="flutter.js" defer></script>
 </body>
 </html>
