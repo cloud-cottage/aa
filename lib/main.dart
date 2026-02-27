@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:aa_doudizhu/core/theme.dart';
-import 'package:aa_doudizhu/presentation/screens/home_screen.dart';
 
 void main() {
-  runApp(const AAApp());
+  runApp(const MyApp());
 }
 
-class AAApp extends StatelessWidget {
-  const AAApp({Key? key}) : super(key: key);
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AA斗地主 - AlleyAce',
-      theme: gothicTheme(),
-      home: const HomeScreen(),
+      title: 'AA斗地主',
+      home: Scaffold(
+        body: Container(
+          color: Colors.red,
+          child: const Center(
+            child: Text('HELLO WORLD', style: TextStyle(fontSize: 40)),
+          ),
+        ),
+      ),
     );
   }
 }
