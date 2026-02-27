@@ -1,6 +1,0 @@
-{
-  "build": {
-    "install": "npm install -g vercel",
-    "build": "vercel build --prod"
-  }
-}
