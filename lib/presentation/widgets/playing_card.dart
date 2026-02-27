@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:aa_doudizhu/domain/game_logic/card.dart';
+import 'package:aa_doudizhu/core/theme.dart';
 
 class PlayingCard extends StatelessWidget {
   final CardModel card;
@@ -8,6 +9,12 @@ class PlayingCard extends StatelessWidget {
   final bool isSelected;
   final VoidCallback? onTap;
   const PlayingCard({Key? key, required this.card, this.width = 72, this.height = 96, this.isSelected = false, this.onTap}) : super(key: key);
+
+  Color get _suitColor {
+    return (card.suit == Suit.hearts || card.suit == Suit.diamonds) 
+        ? kRed 
+        : Colors.white;
+  }
 
   String _rankLabel(Rank r) {
     switch (r) {
@@ -23,8 +30,8 @@ class PlayingCard extends StatelessWidget {
       case Rank.jack: return 'J';
       case Rank.queen: return 'Q';
       case Rank.king: return 'K';
-      case Rank.smallJoker: return 'SJ';
-      case Rank.bigJoker: return 'BJ';
+      case Rank.smallJoker: return '小王';
+      case Rank.bigJoker: return '大王';
     }
   }
 
@@ -41,27 +48,56 @@ class PlayingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final rank = _rankLabel(card.rank);
     final suit = _suitSymbol(card.suit);
+    final borderColor = isSelected ? kGold : Colors.white24;
+    final borderWidth = isSelected ? 2.5 : 1.0;
+    
     final cardWidget = Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         gradient: const LinearGradient(
-          colors: [Color(0xFF1F1F1F), Color(0xFF0A0A0A)],
+          colors: [Color(0xFF2A2A2A), Color(0xFF0F0F0F)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: isSelected ? Colors.amber : Colors.white24, width: isSelected ? 2 : 1),
+        border: Border.all(color: borderColor, width: borderWidth),
+        boxShadow: [
+          BoxShadow(
+            color: isSelected ? kGold.withOpacity(0.3) : Colors.black.withOpacity(0.3),
+            blurRadius: isSelected ? 8 : 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(rank, style: const TextStyle(fontSize: 18, color: Colors.white)),
-            SizedBox(height: 6),
-            Text(suit, style: const TextStyle(fontSize: 22, color: Colors.white)),
-          ],
-        ),
+      child: Stack(
+        children: [
+          // Corner rank
+          Positioned(
+            top: 2,
+            left: 4,
+            child: Text(rank, style: TextStyle(fontSize: 14, color: _suitColor, fontWeight: FontWeight.bold)),
+          ),
+          // Center suit
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(rank, style: TextStyle(fontSize: width * 0.28, color: _suitColor, fontWeight: FontWeight.bold)),
+                Text(suit, style: TextStyle(fontSize: width * 0.35, color: _suitColor)),
+              ],
+            ),
+          ),
+          // Corner suit
+          Positioned(
+            bottom: 2,
+            right: 4,
+            child: Transform.rotate(
+              angle: 3.14159,
+              child: Text(suit, style: TextStyle(fontSize: 14, color: _suitColor)),
+            ),
+          ),
+        ],
       ),
     );
 
