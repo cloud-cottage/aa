@@ -18,6 +18,7 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
   String _currentPlayer = '玩家1';
   final List<String> _players = ['玩家1', '玩家2', '玩家3'];
   Map<String, bool> _playerConnected = {'玩家1': true, '玩家2': true, '玩家3': true};
+  Set<String> _forfeitedPlayers = {}; // 离线判负的玩家
   bool _isReady = false;
   bool _gameStarted = false;
   late AnimationController _animationController;
@@ -127,15 +128,16 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
     final index = _players.indexOf(playerId);
     if (index != -1) {
       setState(() {
+        _forfeitedPlayers.add(playerId); // 标记为离线判负
         _players[index] = '机器人${index + 1}';
         _playerConnected['机器人${index + 1}'] = true;
         _playerConnected.remove(playerId);
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('$playerId 已离线，自动由机器人接管'),
-          backgroundColor: Colors.orange,
-          duration: const Duration(seconds: 2),
+          content: Text('$playerId 已离线，自动判负并由机器人接管'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
         ),
       );
     }
@@ -148,7 +150,7 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('$playerId 已离线'),
+          content: Text('$playerId 已离线，将被判定为负'),
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 2),
         ),
@@ -486,6 +488,7 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
 
   Widget _playerAvatar(String name, bool isCurrentTurn, bool isHost) {
     final isConnected = _playerConnected[name] ?? true;
+    final isForfeited = _forfeitedPlayers.contains(name);
     return Column(
       children: [
         Stack(
@@ -497,8 +500,8 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
                 shape: BoxShape.circle,
                 color: isCurrentTurn ? kGold : (isConnected ? kSurfaceLight : Colors.grey),
                 border: Border.all(
-                  color: isCurrentTurn ? kGold : (isConnected ? Colors.white24 : Colors.red),
-                  width: isCurrentTurn ? 2 : 1,
+                  color: isForfeited ? Colors.red : (isCurrentTurn ? kGold : (isConnected ? Colors.white24 : Colors.red)),
+                  width: isCurrentTurn || isForfeited ? 2 : 1,
                 ),
                 boxShadow: isCurrentTurn ? [
                   BoxShadow(color: kGold.withOpacity(0.4), blurRadius: 8),
@@ -526,6 +529,19 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.star, size: 10, color: kBackground),
+                ),
+              ),
+            if (isForfeited)
+              Positioned(
+                left: -2,
+                top: -2,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.close, size: 10, color: Colors.white),
                 ),
               ),
             if (!isConnected)
@@ -556,12 +572,25 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
         Text(
           name,
           style: TextStyle(
-            color: isCurrentTurn ? kGold : (isConnected ? Colors.white54 : Colors.red),
+            color: isForfeited ? Colors.red : (isCurrentTurn ? kGold : (isConnected ? Colors.white54 : Colors.red)),
             fontSize: 11,
             fontWeight: isCurrentTurn ? FontWeight.bold : FontWeight.normal,
           ),
         ),
-        if (isCurrentTurn)
+        if (isForfeited)
+          Container(
+            margin: const EdgeInsets.only(top: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: const Text(
+              '判负',
+              style: TextStyle(color: Colors.red, fontSize: 9),
+            ),
+          )
+        else if (isCurrentTurn)
           Container(
             margin: const EdgeInsets.only(top: 2),
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
