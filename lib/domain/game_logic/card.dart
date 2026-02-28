@@ -1,8 +1,8 @@
 enum Suit { clubs, diamonds, hearts, spades }
 
 enum Rank {
-  two, three, four, five, six, seven, eight, nine, ten,
-  jack, queen, king, smallJoker, bigJoker
+  three, four, five, six, seven, eight, nine, ten,
+  jack, queen, king, ace, two, smallJoker, bigJoker
 }
 
 class CardModel {

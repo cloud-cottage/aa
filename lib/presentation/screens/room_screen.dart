@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:aa_doudizhu/domain/game_logic/card.dart';
-import 'package:aa_doudizhu/presentation/widgets/card_deck.dart';
+import 'package:aa_doudizhu/domain/game_logic/card_type.dart';
+import 'package:aa_doudizhu/domain/game_logic/doudizhu_round.dart';
 import 'package:aa_doudizhu/domain/game_logic/rule_checker.dart';
 import 'package:aa_doudizhu/domain/game_logic/game_state.dart';
+import 'package:aa_doudizhu/domain/game_logic/ai_greedy.dart';
+import 'package:aa_doudizhu/presentation/widgets/card_deck.dart';
 import 'package:aa_doudizhu/core/theme.dart';
 
 class RoomScreen extends StatefulWidget {
@@ -13,11 +16,10 @@ class RoomScreen extends StatefulWidget {
 }
 
 class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateMixin {
-  late List<CardModel> hand;
+  DoudizhuRound? _round;
   final Set<int> _selected = {};
-  String _currentPlayer = '玩家1';
-  final List<String> _players = ['玩家1', '玩家2', '玩家3'];
-  Map<String, bool> _playerConnected = {'玩家1': true, '玩家2': true, '玩家3': true};
+  final List<String> _players = ['我', '机器人2', '机器人3'];
+  Map<String, bool> _playerConnected = {'我': true, '机器人2': true, '机器人3': true};
   Set<String> _forfeitedPlayers = {};
   bool _isReady = false;
   bool _gameStarted = false;
@@ -25,10 +27,12 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
   late Animation<double> _fadeAnimation;
   bool _botJoined = false;
 
+  List<CardModel> get _hand => _round?.handAt(0) ?? [];
+  String get _currentPlayerName => _round != null ? _players[_round!.currentPlayerIndex] : _players[0];
+
   @override
   void initState() {
     super.initState();
-    hand = _demoHand();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -43,20 +47,12 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
   void _startBotJoinTimer() {
     Future.delayed(const Duration(seconds: 8), () {
       if (!_botJoined && mounted && !_gameStarted) {
-        setState(() {
-          _botJoined = true;
-          _players[1] = '机器人2';
-          _players[2] = '机器人3';
-          _playerConnected['机器人2'] = true;
-          _playerConnected['机器人3'] = true;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('机器人已加入游戏'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
+        setState(() => _botJoined = true);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('机器人已加入游戏'), backgroundColor: Colors.green, duration: Duration(seconds: 2)),
+          );
+        }
       }
     });
   }
@@ -65,17 +61,6 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
   void dispose() {
     _animationController.dispose();
     super.dispose();
-  }
-
-  List<CardModel> _demoHand() {
-    return [
-      CardModel(suit: Suit.hearts, rank: Rank.four, id: 1),
-      CardModel(suit: Suit.spades, rank: Rank.king, id: 2),
-      CardModel(suit: Suit.clubs, rank: Rank.ten, id: 3),
-      CardModel(suit: Suit.diamonds, rank: Rank.nine, id: 4),
-      CardModel(suit: Suit.clubs, rank: Rank.jack, id: 5),
-      CardModel(suit: Suit.spades, rank: Rank.eight, id: 6),
-    ];
   }
 
   void _toggleSelect(int idx) {
@@ -91,50 +76,115 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
   void _handlePlay() {
     final playing = _selected.toList();
     if (playing.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请先选择要出的牌')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('请先选择要出的牌')));
       return;
     }
-    if (!_gameStarted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请先准备游戏')),
-      );
+    if (!_gameStarted || _round == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('请先开始游戏')));
       return;
     }
-    final selectedCards = playing.map((i) => hand[i]).toList();
-    final state = GameState(roomId: 'r', currentTurnPlayerId: _currentPlayer, hands: hand, deskCards: []);
-    final ok = SimpleRuleChecker().isLegalPlay(selectedCards, state);
-    
+    if (_round!.currentPlayerIndex != 0) return;
+
+    final selectedCards = playing.map((i) => _hand[i]).toList();
+    final checker = SimpleRuleChecker();
+    final state = GameState(roomId: 'r', currentTurnPlayerId: 'me', hands: _hand, deskCards: _round!.lastPlay);
+
+    bool ok = checker.isLegalPlay(selectedCards, state);
+    if (ok && _round!.lastPlay.isNotEmpty) {
+      ok = checker.canBeat(selectedCards, _round!.lastPlay, state);
+    }
+
     _animationController.forward(from: 0);
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(ok ? '出牌成功!' : '出牌不合法'),
-        backgroundColor: ok ? Colors.green : Colors.red,
-      ),
-    );
-    
-    if (ok) {
-      setState(() {
-        for (var idx in playing.reversed) {
-          if (idx < hand.length) {
-            hand.removeAt(idx);
-          }
-        }
-        _selected.clear();
-        _nextPlayer();
+    if (!ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_round!.lastPlay.isEmpty ? '出牌不合法' : '无法压过上家的牌'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    setState(() {
+      _round = _round!.withPlay(0, selectedCards, multiplierFactor: checker.playMultiplier(selectedCards));
+      _selected.clear();
+    });
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('出牌成功!'), backgroundColor: Colors.green));
+    _maybeAiTurn();
+  }
+
+  void _handlePass() {
+    if (!_gameStarted || _round == null) return;
+    if (_round!.currentPlayerIndex != 0) return;
+    if (_round!.isCurrentPlayerLeading) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('您领头，不能过牌')));
+      return;
+    }
+    setState(() {
+      _round = _round!.withPass(0);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('过牌'), duration: Duration(seconds: 1)));
+    _maybeAiTurn();
+  }
+
+  void _maybeAiTurn() {
+    if (_round == null || _round!.winnerPlayerId != null) {
+      if (_round?.winnerPlayerId != null && mounted) {
+        _showWinnerDialog();
+      }
+      return;
+    }
+    if (_round!.currentPlayerIndex == 1 || _round!.currentPlayerIndex == 2) {
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted || _round == null) return;
+        _aiPlay(_round!.currentPlayerIndex);
       });
     }
   }
 
-  void _nextPlayer() {
-    final currentIdx = _players.indexOf(_currentPlayer);
-    final nextIdx = (currentIdx + 1) % _players.length;
+  void _aiPlay(int playerIndex) {
+    if (_round == null || _round!.winnerPlayerId != null) return;
+    final hand = _round!.handAt(playerIndex);
+    if (hand.isEmpty) return;
+
+    final ai = GreedyAI();
+    final state = GameState(roomId: 'r', currentTurnPlayerId: 'bot', hands: hand, deskCards: _round!.lastPlay);
+    var play = ai.choosePlay(state, hand);
+
+    if (_round!.lastPlay.isNotEmpty) {
+      final checker = SimpleRuleChecker();
+      if (!checker.canBeat(play, _round!.lastPlay, state)) {
+        play = [];
+      }
+    }
     setState(() {
-      _currentPlayer = _players[nextIdx];
+      if (play.isEmpty) {
+        _round = _round!.withPass(playerIndex);
+      } else {
+        _round = _round!.withPlay(playerIndex, play, multiplierFactor: SimpleRuleChecker().playMultiplier(play));
+      }
     });
-    _checkDisconnectedPlayers();
+    _maybeAiTurn();
+  }
+
+  void _showWinnerDialog() {
+    final winner = _round?.winnerPlayerId == 'p0' ? '我' : (_round?.winnerPlayerId == 'p1' ? '机器人2' : '机器人3');
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: kSurface,
+        title: Text('对局结束', style: TextStyle(color: kGold)),
+        content: Text('$winner 获胜！', style: const TextStyle(color: Colors.white, fontSize: 18)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('确定'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _nextPlayer() {
+    _maybeAiTurn();
   }
 
   void _checkDisconnectedPlayers() {
@@ -194,7 +244,7 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
       }
     });
     
-    final readyCount = _players.where((p) => p == _currentPlayer).length + 1;
+    final readyCount = _players.where((p) => p == _currentPlayerName).length + 1;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(_isReady ? '已准备' : '已取消准备'),
@@ -206,15 +256,13 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
 
   void _startGame() {
     setState(() {
+      _round = DoudizhuRound.newGame();
       _gameStarted = true;
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('游戏开始!'),
-        backgroundColor: kGold,
-        duration: Duration(seconds: 2),
-      ),
+      const SnackBar(content: Text('游戏开始! 地主先行'), backgroundColor: kGold, duration: Duration(seconds: 2)),
     );
+    _maybeAiTurn();
   }
 
   @override
@@ -269,8 +317,9 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
                 children: _players.asMap().entries.map((entry) {
                   final idx = entry.key;
                   final name = entry.value;
-                  final isCurrentTurn = name == _currentPlayer && _gameStarted;
-                  return _playerAvatar(name, isCurrentTurn, idx == 0);
+                  final isCurrentTurn = name == _currentPlayerName && _gameStarted;
+                  final isLandlord = _round != null && idx == _round!.landlordIndex;
+                  return _playerAvatar(name, isCurrentTurn, isLandlord);
                 }).toList(),
               ),
             ),
@@ -311,10 +360,22 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
                             ),
                           ),
                           const SizedBox(height: 8),
+                          if (_round?.lastPlay.isNotEmpty == true)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: CardDeck(
+                                cards: _round!.lastPlay,
+                                selectedIndices: {},
+                                onCardTap: (_) {},
+                                cardWidth: 36,
+                                cardHeight: 50,
+                                spacing: 2,
+                              ),
+                            ),
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              _infoChip('底分', '1', kGold),
+                              _infoChip('倍数', '${_round?.multipliers ?? 1}', kGold),
                               const SizedBox(width: 12),
                               _infoChip('玩家', '${_players.length}/3', Colors.white54),
                             ],
@@ -361,7 +422,7 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
                       children: [
                         Row(
                           children: [
-                            Text('手牌 (${hand.length}张)', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                            Text('手牌 (${_hand.length}张)', style: TextStyle(color: Colors.white70, fontSize: 14)),
                             if (_selected.isNotEmpty)
                               Container(
                                 margin: const EdgeInsets.only(left: 8),
@@ -380,15 +441,15 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                           decoration: BoxDecoration(
-                            color: (_currentPlayer == '玩家1' && _gameStarted) 
+                            color: (_currentPlayerName == '我' && _gameStarted) 
                               ? kGold.withOpacity(0.2) 
                               : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            '当前: $_currentPlayer',
+                            '当前: $_currentPlayerName',
                             style: TextStyle(
-                              color: (_currentPlayer == '玩家1' && _gameStarted) 
+                              color: (_currentPlayerName == '我' && _gameStarted) 
                                 ? kGold 
                                 : Colors.white54,
                               fontWeight: FontWeight.bold,
@@ -401,15 +462,15 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
                     const SizedBox(height: 12),
                     SizedBox(
                       height: 100,
-                      child: hand.isEmpty
+                      child: _hand.isEmpty
                         ? Center(
                             child: Text(
-                              '游戏结束!',
+                              _round?.winnerPlayerId != null ? '游戏结束!' : '等待中...',
                               style: TextStyle(color: kGold, fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                           )
                         : CardDeck(
-                            cards: hand,
+                            cards: _hand,
                             selectedIndices: _selected,
                             onCardTap: _toggleSelect,
                             cardWidth: 60,
@@ -420,9 +481,22 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
                     const SizedBox(height: 16),
                     Row(
                       children: [
+                        if (!(_round?.isCurrentPlayerLeading ?? true) && _round?.currentPlayerIndex == 0)
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: _hand.isEmpty ? null : _handlePass,
+                              icon: const Icon(Icons.skip_next),
+                              label: const Text('过'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: kSurfaceLight,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                              ),
+                            ),
+                          ),
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: hand.isEmpty ? null : _handlePlay,
+                            onPressed: _hand.isEmpty || _round?.currentPlayerIndex != 0 ? null : _handlePlay,
                             icon: const Icon(Icons.arrow_upward),
                             label: const Text('出牌'),
                             style: ElevatedButton.styleFrom(
@@ -434,7 +508,7 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
                         ),
                         const SizedBox(width: 12),
                         ElevatedButton.icon(
-                          onPressed: hand.isEmpty ? null : () {
+                          onPressed: _hand.isEmpty ? null : () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('提示功能开发中...')),
                             );
@@ -449,10 +523,8 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
                         ),
                         const SizedBox(width: 12),
                         ElevatedButton.icon(
-                          onPressed: hand.isEmpty ? null : () {
-                            setState(() {
-                              _selected.clear();
-                            });
+                          onPressed: _hand.isEmpty ? null : () {
+                            setState(() => _selected.clear());
                           },
                           icon: const Icon(Icons.clear),
                           label: const Text('取消'),

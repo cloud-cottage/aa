@@ -58,12 +58,14 @@ class CardTypeDetector {
         return 12;
       case Rank.king:
         return 13;
-      case Rank.two:
+      case Rank.ace:
         return 14;
-      case Rank.smallJoker:
+      case Rank.two:
         return 15;
-      case Rank.bigJoker:
+      case Rank.smallJoker:
         return 16;
+      case Rank.bigJoker:
+        return 17;
     }
   }
 
