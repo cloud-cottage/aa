@@ -16,7 +16,8 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
   late List<CardModel> hand;
   final Set<int> _selected = {};
   String _currentPlayer = '玩家1';
-  final List<String> _players = ['玩家1', '玩家2', '玩家3', '玩家4'];
+  final List<String> _players = ['玩家1', '玩家2', '玩家3'];
+  Map<String, bool> _playerConnected = {'玩家1': true, '玩家2': true, '玩家3': true};
   bool _isReady = false;
   bool _gameStarted = false;
   late AnimationController _animationController;
@@ -109,6 +110,53 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
     setState(() {
       _currentPlayer = _players[nextIdx];
     });
+    _checkDisconnectedPlayers();
+  }
+
+  void _checkDisconnectedPlayers() {
+    for (int i = 0; i < _players.length; i++) {
+      final player = _players[i];
+      if (_playerConnected[player] == false && !player.startsWith('bot_')) {
+        _replaceWithBot(player);
+        break;
+      }
+    }
+  }
+
+  void _replaceWithBot(String playerId) {
+    final index = _players.indexOf(playerId);
+    if (index != -1) {
+      setState(() {
+        _players[index] = '机器人${index + 1}';
+        _playerConnected['机器人${index + 1}'] = true;
+        _playerConnected.remove(playerId);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$playerId 已离线，自动由机器人接管'),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  void simulatePlayerDisconnect(String playerId) {
+    if (_playerConnected.containsKey(playerId)) {
+      setState(() {
+        _playerConnected[playerId] = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$playerId 已离线'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      if (_gameStarted) {
+        _replaceWithBot(playerId);
+      }
+    }
   }
 
   void _handleReady() {
@@ -243,7 +291,7 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
                             children: [
                               _infoChip('底分', '1', kGold),
                               const SizedBox(width: 12),
-                              _infoChip('玩家', '${_players.length}/4', Colors.white54),
+                              _infoChip('玩家', '${_players.length}/3', Colors.white54),
                             ],
                           ),
                           if (!_gameStarted) ...[
@@ -437,6 +485,7 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
   }
 
   Widget _playerAvatar(String name, bool isCurrentTurn, bool isHost) {
+    final isConnected = _playerConnected[name] ?? true;
     return Column(
       children: [
         Stack(
@@ -446,9 +495,9 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
               height: 44,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isCurrentTurn ? kGold : kSurfaceLight,
+                color: isCurrentTurn ? kGold : (isConnected ? kSurfaceLight : Colors.grey),
                 border: Border.all(
-                  color: isCurrentTurn ? kGold : Colors.white24,
+                  color: isCurrentTurn ? kGold : (isConnected ? Colors.white24 : Colors.red),
                   width: isCurrentTurn ? 2 : 1,
                 ),
                 boxShadow: isCurrentTurn ? [
@@ -459,7 +508,7 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
                 child: Text(
                   name[0],
                   style: TextStyle(
-                    color: isCurrentTurn ? kBackground : Colors.white54,
+                    color: isCurrentTurn ? kBackground : (isConnected ? Colors.white54 : Colors.white30),
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -479,6 +528,19 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
                   child: const Icon(Icons.star, size: 10, color: kBackground),
                 ),
               ),
+            if (!isConnected)
+              Positioned(
+                right: -2,
+                bottom: -2,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.cloud_off, size: 10, color: Colors.white),
+                ),
+              ),
             if (isCurrentTurn)
               Positioned.fill(
                 child: Container(
@@ -494,7 +556,7 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
         Text(
           name,
           style: TextStyle(
-            color: isCurrentTurn ? kGold : Colors.white54,
+            color: isCurrentTurn ? kGold : (isConnected ? Colors.white54 : Colors.red),
             fontSize: 11,
             fontWeight: isCurrentTurn ? FontWeight.bold : FontWeight.normal,
           ),
