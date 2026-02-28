@@ -37,7 +37,18 @@ void main() {
     expect(checker.canBeat(current, last, state), isTrue);
   });
 
-  test('Rocket beats rocket and non-rocket', () {
+  test('Rocket beats non-rocket', () {
+    final checker = SimpleRuleChecker();
+    final last = [CardModel(suit: Suit.clubs, rank: Rank.king, id: 100)];
+    final rocketCurrent = [
+      CardModel(suit: Suit.hearts, rank: Rank.smallJoker, id: 102),
+      CardModel(suit: Suit.spades, rank: Rank.bigJoker, id: 103),
+    ];
+    final state = GameState(roomId: 'r', currentTurnPlayerId: 'p', hands: rocketCurrent, deskCards: []);
+    expect(checker.canBeat(rocketCurrent, last, state), isTrue);
+  });
+
+  test('Rocket cannot be beaten (even by rocket)', () {
     final checker = SimpleRuleChecker();
     final rocketLast = [
       CardModel(suit: Suit.clubs, rank: Rank.smallJoker, id: 100),
@@ -48,7 +59,6 @@ void main() {
       CardModel(suit: Suit.spades, rank: Rank.bigJoker, id: 103),
     ];
     final state = GameState(roomId: 'r', currentTurnPlayerId: 'p', hands: rocketCurrent, deskCards: []);
-    // rocket beats rocket (same type) should return true according to our simplified rule
-    expect(checker.canBeat(rocketCurrent, rocketLast, state), isTrue);
+    expect(checker.canBeat(rocketCurrent, rocketLast, state), isFalse);
   });
 }

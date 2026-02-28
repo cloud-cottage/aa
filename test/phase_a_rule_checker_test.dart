@@ -11,10 +11,10 @@ void main() {
     expect(checker.isLegalPlay(hand, state), isTrue);
   });
 
-  test('SimpleRuleChecker canBeat', () {
+  test('SimpleRuleChecker canBeat: pair beats pair (higher rank)', () {
     final checker = SimpleRuleChecker();
-    final last = [CardModel(suit: Suit.spades, rank: Rank.king, id: 1)];
-    final current = [CardModel(suit: Suit.spades, rank: Rank.king, id: 2), CardModel(suit: Suit.spades, rank: Rank.king, id: 3)];
+    final last = [CardModel(suit: Suit.spades, rank: Rank.jack, id: 1), CardModel(suit: Suit.hearts, rank: Rank.jack, id: 2)];
+    final current = [CardModel(suit: Suit.spades, rank: Rank.king, id: 2), CardModel(suit: Suit.clubs, rank: Rank.king, id: 3)];
     final state = GameState(roomId: 'r', currentTurnPlayerId: 'p', hands: current, deskCards: []);
     expect(checker.canBeat(current, last, state), isTrue);
   });
@@ -31,6 +31,27 @@ void main() {
     final checker = SimpleRuleChecker();
     final last = [CardModel(suit: Suit.clubs, rank: Rank.king, id: 6)];
     final current = [CardModel(suit: Suit.clubs, rank: Rank.jack, id: 7)];
+    final state = GameState(roomId: 'r', currentTurnPlayerId: 'p', hands: current, deskCards: []);
+    expect(checker.canBeat(current, last, state), isFalse);
+  });
+
+  test('Bomb beats non-bomb', () {
+    final checker = SimpleRuleChecker();
+    final last = [CardModel(suit: Suit.clubs, rank: Rank.king, id: 1)];
+    final current = [
+      CardModel(suit: Suit.hearts, rank: Rank.seven, id: 2),
+      CardModel(suit: Suit.clubs, rank: Rank.seven, id: 3),
+      CardModel(suit: Suit.diamonds, rank: Rank.seven, id: 4),
+      CardModel(suit: Suit.spades, rank: Rank.seven, id: 5),
+    ];
+    final state = GameState(roomId: 'r', currentTurnPlayerId: 'p', hands: current, deskCards: []);
+    expect(checker.canBeat(current, last, state), isTrue);
+  });
+
+  test('Pair cannot beat single (different type)', () {
+    final checker = SimpleRuleChecker();
+    final last = [CardModel(suit: Suit.clubs, rank: Rank.jack, id: 1)];
+    final current = [CardModel(suit: Suit.spades, rank: Rank.king, id: 2), CardModel(suit: Suit.hearts, rank: Rank.king, id: 3)];
     final state = GameState(roomId: 'r', currentTurnPlayerId: 'p', hands: current, deskCards: []);
     expect(checker.canBeat(current, last, state), isFalse);
   });

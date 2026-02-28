@@ -34,11 +34,19 @@ void main() {
     expect(checker.canBeat(current, [], state), isTrue);
   });
 
-  test('CanBeat: rocket vs non-rocket', () {
+  test('CanBeat: rocket beats any non-rocket', () {
+    final checker = SimpleRuleChecker();
+    final last = [CardModel(suit: Suit.clubs, rank: Rank.king, id: 20)];
+    final current = [CardModel(suit: Suit.hearts, rank: Rank.smallJoker, id: 22), CardModel(suit: Suit.spades, rank: Rank.bigJoker, id: 23)];
+    final state = GameState(roomId: 'r', currentTurnPlayerId: 'p', hands: current, deskCards: []);
+    expect(checker.canBeat(current, last, state), isTrue);
+  });
+
+  test('CanBeat: rocket cannot be beaten by anything', () {
     final checker = SimpleRuleChecker();
     final last = [CardModel(suit: Suit.clubs, rank: Rank.smallJoker, id: 20), CardModel(suit: Suit.diamonds, rank: Rank.bigJoker, id: 21)];
     final current = [CardModel(suit: Suit.hearts, rank: Rank.smallJoker, id: 22), CardModel(suit: Suit.spades, rank: Rank.bigJoker, id: 23)];
     final state = GameState(roomId: 'r', currentTurnPlayerId: 'p', hands: current, deskCards: []);
-    expect(checker.canBeat(current, last, state), isTrue);
+    expect(checker.canBeat(current, last, state), isFalse);
   });
 }

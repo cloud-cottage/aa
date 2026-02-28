@@ -42,4 +42,47 @@ void main() {
     ];
     expect(CardTypeDetector.detect(cards), CardType.rocket);
   });
+
+  test('CardTypeDetector detects triplet', () {
+    final cards = [
+      CardModel(suit: Suit.hearts, rank: Rank.ten, id: 15),
+      CardModel(suit: Suit.clubs, rank: Rank.ten, id: 16),
+      CardModel(suit: Suit.diamonds, rank: Rank.ten, id: 17),
+    ];
+    expect(CardTypeDetector.detect(cards), CardType.triplet);
+  });
+
+  test('CardTypeDetector detects tripletWithSingle', () {
+    final cards = [
+      CardModel(suit: Suit.hearts, rank: Rank.nine, id: 18),
+      CardModel(suit: Suit.clubs, rank: Rank.nine, id: 19),
+      CardModel(suit: Suit.diamonds, rank: Rank.nine, id: 20),
+      CardModel(suit: Suit.spades, rank: Rank.four, id: 21),
+    ];
+    expect(CardTypeDetector.detect(cards), CardType.tripletWithSingle);
+  });
+
+  test('CardTypeDetector detects doubleSequence', () {
+    final cards = [
+      CardModel(suit: Suit.clubs, rank: Rank.five, id: 22),
+      CardModel(suit: Suit.diamonds, rank: Rank.five, id: 23),
+      CardModel(suit: Suit.hearts, rank: Rank.six, id: 24),
+      CardModel(suit: Suit.spades, rank: Rank.six, id: 25),
+      CardModel(suit: Suit.clubs, rank: Rank.seven, id: 26),
+      CardModel(suit: Suit.diamonds, rank: Rank.seven, id: 27),
+    ];
+    expect(CardTypeDetector.detect(cards), CardType.doubleSequence);
+  });
+
+  test('CardTypeDetector detects fourWithTwoSingles', () {
+    final cards = [
+      CardModel(suit: Suit.hearts, rank: Rank.eight, id: 28),
+      CardModel(suit: Suit.clubs, rank: Rank.eight, id: 29),
+      CardModel(suit: Suit.diamonds, rank: Rank.eight, id: 30),
+      CardModel(suit: Suit.spades, rank: Rank.eight, id: 31),
+      CardModel(suit: Suit.clubs, rank: Rank.three, id: 32),
+      CardModel(suit: Suit.hearts, rank: Rank.four, id: 33),
+    ];
+    expect(CardTypeDetector.detect(cards), CardType.fourWithTwoSingles);
+  });
 }
