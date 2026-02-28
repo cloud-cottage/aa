@@ -11,6 +11,7 @@ class ShopScreen extends StatelessWidget {
       body: Container(
         color: kBackground,
         child: const Center(child: Text('商城', style: TextStyle(color: Colors.white54))),
+      ),
     );
   }
 }
