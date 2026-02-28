@@ -18,11 +18,12 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
   String _currentPlayer = '玩家1';
   final List<String> _players = ['玩家1', '玩家2', '玩家3'];
   Map<String, bool> _playerConnected = {'玩家1': true, '玩家2': true, '玩家3': true};
-  Set<String> _forfeitedPlayers = {}; // 离线判负的玩家
+  Set<String> _forfeitedPlayers = {};
   bool _isReady = false;
   bool _gameStarted = false;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  bool _botJoined = false;
 
   @override
   void initState() {
@@ -36,6 +37,28 @@ class _RoomScreenState extends State<RoomScreen> with SingleTickerProviderStateM
       parent: _animationController,
       curve: Curves.easeInOut,
     );
+    _startBotJoinTimer();
+  }
+
+  void _startBotJoinTimer() {
+    Future.delayed(const Duration(seconds: 8), () {
+      if (!_botJoined && mounted && !_gameStarted) {
+        setState(() {
+          _botJoined = true;
+          _players[1] = '机器人2';
+          _players[2] = '机器人3';
+          _playerConnected['机器人2'] = true;
+          _playerConnected['机器人3'] = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('机器人已加入游戏'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    });
   }
 
   @override
