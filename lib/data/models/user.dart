@@ -5,9 +5,17 @@ class User {
   final String? walletAddress;
   int goldBalance;
   List<String> nftOwnedTokenIds;
+  final String? avatarPath;
 
-  User({required this.userId, required this.displayName, this.email, this.walletAddress, this.goldBalance = 0, List<String>? nftOwnedTokenIds})
-      : nftOwnedTokenIds = nftOwnedTokenIds ?? [];
+  User({
+    required this.userId, 
+    required this.displayName, 
+    this.email, 
+    this.walletAddress, 
+    this.goldBalance = 0, 
+    List<String>? nftOwnedTokenIds,
+    this.avatarPath,
+  }) : nftOwnedTokenIds = nftOwnedTokenIds ?? [];
 
   Map<String, dynamic> toJson() {
     return {
@@ -17,6 +25,7 @@ class User {
       'walletAddress': walletAddress,
       'goldBalance': goldBalance,
       'nftOwnedTokenIds': nftOwnedTokenIds,
+      'avatarPath': avatarPath,
     };
   }
 
@@ -28,6 +37,7 @@ class User {
       walletAddress: json['walletAddress'],
       goldBalance: json['goldBalance'] ?? 0,
       nftOwnedTokenIds: List<String>.from(json['nftOwnedTokenIds'] ?? []),
+      avatarPath: json['avatarPath'],
     );
   }
 }

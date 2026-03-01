@@ -93,6 +93,7 @@ class HomeScreen extends StatelessWidget {
                         childAspectRatio: 1,
                         children: [
                           _buildMenuItem(Icons.groups, '多人游戏', Colors.purple),
+                          _buildMenuItem(Icons.people, '用户演示', Colors.blue),
                           _buildMenuItem(Icons.store, '商城', Colors.orange),
                           _buildMenuItem(Icons.inventory_2, '背包', Colors.green),
                           _buildMenuItem(Icons.leaderboard, '排行榜', Colors.red),

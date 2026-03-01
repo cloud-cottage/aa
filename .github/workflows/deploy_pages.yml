@@ -26,14 +26,24 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          cache: true
       - name: Install dependencies
         run: flutter pub get
+      - name: Enable web
+        run: flutter config --enable-web
       - name: Run tests
-        run: flutter test
+        run: flutter test --coverage
       - name: Build Web
-        run: flutter build web --release
+        run: flutter build web --release --web-renderer canvaskit --base-href "/${{ github.event.repository.name }}/"
       - name: List build output
-        run: ls -la build/web/
+        run: |
+          echo "Build directory contents:"
+          ls -la build/web/
+          echo "Checking for flutter.js:"
+          find build/web/ -name "flutter.js" -o -name "main.dart.js"
+      - name: Fix base href for GitHub Pages
+        run: |
+          sed -i 's|<base href="$FLUTTER_BASE_HREF">|<base href="/${{ github.event.repository.name }}/">|g' build/web/index.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

@@ -6,6 +6,7 @@ import 'package:aa_doudizhu/presentation/screens/shop_screen.dart';
 import 'package:aa_doudizhu/presentation/screens/inventory_screen.dart';
 import 'package:aa_doudizhu/presentation/screens/leaderboard_screen.dart';
 import 'package:aa_doudizhu/presentation/screens/profile_screen.dart';
+import 'package:aa_doudizhu/presentation/screens/user_demo_screen.dart';
 
 class AppRouter {
   static Route<dynamic>? generateRoute(RouteSettings settings) {
@@ -24,6 +25,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const LeaderboardScreen());
       case '/profile':
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
+      case '/user_demo':
+        return MaterialPageRoute(builder: (_) => const UserDemoScreen());
       default:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
     }

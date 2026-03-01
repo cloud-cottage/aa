@@ -7,7 +7,10 @@ abstract class RuleChecker {
   bool canBeat(List<CardModel> currentPlay, List<CardModel> lastPlay, GameState state);
 
   /// 计算本手出牌的倍数贡献（炸弹×2、火箭×2 等，后续可扩展春天/反春天）
-  int playMultiplier(List<CardModel> play);
+  int playMultiplier(List<CardModel> play, GameState state);
+
+  /// 计算包含NFT效果的总倍数
+  int calculateTotalMultiplier(List<CardModel> play, GameState state);
 }
 
 int _defaultPlayMultiplier(List<CardModel> play) {
@@ -77,5 +80,16 @@ class SimpleRuleChecker implements RuleChecker {
   }
 
   @override
-  int playMultiplier(List<CardModel> play) => _defaultPlayMultiplier(play);
+  int playMultiplier(List<CardModel> play, GameState state) {
+    return _defaultPlayMultiplier(play);
+  }
+
+  @override
+  int calculateTotalMultiplier(List<CardModel> play, GameState state) {
+    final baseMultiplier = playMultiplier(play, state);
+    final currentPlayerId = state.currentTurnPlayerId;
+    final nftMultiplier = state.calculateNFTMultiplier(currentPlayerId, play);
+    
+    return baseMultiplier * nftMultiplier;
+  }
 }
