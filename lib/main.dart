@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'router/app_router.dart';
 
 void main() {
   runApp(const ProviderScope(child: SimpleApp()));
@@ -10,7 +12,7 @@ class SimpleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'AA斗地主 - AlleyAce',
       theme: ThemeData(
         brightness: Brightness.dark,
@@ -22,7 +24,7 @@ class SimpleApp extends StatelessWidget {
           background: const Color(0xFF0F0F1A),
         ),
       ),
-      home: const SimpleHomePage(),
+      routerConfig: AppRouter.router,
       debugShowCheckedModeBanner: false,
     );
   }
@@ -156,12 +158,8 @@ class SimpleHomePage extends StatelessWidget {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('游戏功能开发中，敬请期待！'),
-                                backgroundColor: Color(0xFFD4AF37),
-                              ),
-                            );
+                            // 导航到游戏页面
+                            context.go('/game');
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFD4AF37),
@@ -177,6 +175,35 @@ class SimpleHomePage extends StatelessWidget {
                               Icon(Icons.play_arrow),
                               SizedBox(width: 8),
                               Text('开始游戏', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // 用户数据库演示按钮
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            // 导航到用户演示页面
+                            context.go('/user_demo');
+                          },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFFD4AF37),
+                            side: const BorderSide(color: Color(0xFFD4AF37)),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.people),
+                              SizedBox(width: 8),
+                              Text('用户数据库演示', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
