@@ -34,7 +34,7 @@ jobs:
       - name: Run tests
         run: flutter test --coverage
       - name: Build Web
-        run: flutter build web --release --web-renderer canvaskit --base-href "/${{ github.event.repository.name }}/"
+        run: flutter build web --release --base-href "/aa/"
       - name: List build output
         run: |
           echo "Build directory contents:"
@@ -43,7 +43,7 @@ jobs:
           find build/web/ -name "flutter.js" -o -name "main.dart.js"
       - name: Fix base href for GitHub Pages
         run: |
-          sed -i 's|<base href="$FLUTTER_BASE_HREF">|<base href="/${{ github.event.repository.name }}/">|g' build/web/index.html
+          sed -i 's|<base href="$FLUTTER_BASE_HREF">|<base href="/aa/">|g' build/web/index.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
