@@ -26,7 +26,7 @@
     window.addEventListener('load', function(ev) {
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
-          serviceWorkerVersion: serviceWorkerVersion,
+          serviceWorkerVersion: '0',
         }
       }).then(function(engineInitializer) {
         return engineInitializer.initializeEngine();
