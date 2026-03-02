@@ -10,7 +10,12 @@ void main() {
     final state = GameState(
       roomId: 'test_room',
       currentTurnPlayerId: 'test_player',
-      players: {},
+      players: {
+        'test_player': PlayerState(
+          userId: 'test_player',
+          handCards: hand,
+        ),
+      },
       currentPhase: GamePhase.playing,
     );
     expect(checker.isLegalPlay(hand, state), isTrue);
@@ -23,7 +28,12 @@ void main() {
     final state = GameState(
       roomId: 'test_room',
       currentTurnPlayerId: 'test_player',
-      players: {},
+      players: {
+        'test_player': PlayerState(
+          userId: 'test_player',
+          handCards: current,
+        ),
+      },
       currentPhase: GamePhase.playing,
     );
     expect(checker.canBeat(current, last, state), isTrue);

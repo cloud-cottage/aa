@@ -15,7 +15,12 @@ void main() {
     final state = GameState(
       roomId: 'test_room',
       currentTurnPlayerId: 'test_player',
-      players: {},
+      players: {
+        'test_player': PlayerState(
+          userId: 'test_player',
+          handCards: hand,
+        ),
+      },
       currentPhase: GamePhase.playing,
     );
     final play = ai.choosePlay(state, hand);

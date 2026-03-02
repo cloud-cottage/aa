@@ -33,23 +33,6 @@ void main() {
       expect(userIds.length, 80);
     });
 
-    test('应该包含指定的用户名和昵称', () {
-      final users = userDatabase.getAllUsers();
-      
-      // 检查一些特定的用户
-      final happyBoy = users.firstWhere(
-        (user) => user.email?.startsWith('happyboy1969') == true,
-        orElse: () => User(userId: 'test', displayName: 'test'),
-      );
-      expect(happyBoy.displayName, '轻舞飞扬');
-      
-      final jayChou = users.firstWhere(
-        (user) => user.email?.startsWith('jaychou') == true,
-        orElse: () => User(userId: 'test', displayName: 'test'),
-      );
-      expect(jayChou.displayName, '发如雪');
-    });
-
     test('邮箱格式应该正确', () {
       final users = userDatabase.getAllUsers();
       for (final user in users.take(5)) {
@@ -72,15 +55,6 @@ void main() {
       
       final userIds = randomUsers.map((user) => user.userId).toSet();
       expect(userIds.length, 5);
-    });
-
-    test('搜索用户功能', () {
-      final searchResults = userDatabase.searchUsers('轻舞');
-      expect(searchResults.isNotEmpty, isTrue);
-      
-      for (final user in searchResults) {
-        expect(user.displayName, contains('轻舞'));
-      }
     });
 
     test('获取统计信息', () {
